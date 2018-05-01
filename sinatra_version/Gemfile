@@ -1,0 +1,9 @@
+# Gemfile
+
+source 'https://rubygems.org'
+gem 'bundler'
+gem 'sinatra'
+gem 'pg'
+gem 'erubis'
+gem 'sequel'
+gem 'sequel_pg'
