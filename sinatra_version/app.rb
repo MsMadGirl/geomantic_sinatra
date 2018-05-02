@@ -102,46 +102,114 @@ def add_line(line1, line2)
 
 end
 
-def derive_niece (this_chart_id, fig_position)
+def add_figure(figure1, figure2)
+
+	figure = Hash.new
+
+	figure[:fire_line] = add_line(figure1[:fire], figure2[:fire])
+	figure[:air_line] = add_line(figure1[:air], figure2[:air])
+	figure[:water_line] = add_line(figure1[:water], figure2[:water])
+	figure[:earth_line] = add_line(figure1[:earth], figure2[:earth])
+
+	return figure
+end
+
+def derive_niece (this_chart_id)
 
 	#fetch figures from db
 
-	result_set = DB.fetch('SELECT * FROM figures INNER JOIN c_figures on figures.id = c_figures.fig_id WHERE c_figures.chart_id = ? ORDER BY c_figures.id;', this_table_id).all
+	result_set = DB.fetch('SELECT fire, air, water, earth FROM figures INNER JOIN c_figures on figures.id = c_figures.figure_id WHERE c_figures.chart_id = ? ORDER BY c_figures.id;', this_chart_id).all
+
+	puts "~~~~~~~"
+	puts result_set
+	puts "~~~~~~~"
 
 	#shift to remove figures from the front of the array, in some kind of loop
 	#add lines four times
 	#create figure
 	#do four times to create nieces
 
+#oops, the array indices are wrong, figure out what the correct indices are
+
+	(1..4).each do |e|
+
+		puts "Niece #{e}"
 		figure1 = result_set.shift
+		puts figure1
 		figure2 = result_set.shift
-	
+		puts figure2
 
-		add_line(line1, line2)
+		figure = add_figure(figure1, figure2)
 
-	
+		# puts "*****"
+		# puts figure
+		# puts "*****"
 
-	#insert new figures into db
+		figure_id = DB.fetch('SELECT id FROM figures WHERE fire = ? AND air = ? AND water = ? AND earth = ?', figure[:fire_line], figure[:air_line], figure[:water_line], figure[:earth_line]).single_value
+		puts figure_id
+
+		c_figures = DB[:c_figures]
+
+		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Niece', :fig_position => e)
+	end
 	
 end
 
-def derive_witnesses(this_chart_id, fig_position)
+def derive_witness(this_chart_id)
 
-	result_set = DB.fetch("SELECT * FROM figures INNER JOIN c_figures on figures.id = c_figures.fig_id WHERE c_figures.chart_id = ? AND c_figures.fig_group = 'Niece' ORDER BY c_figures.id;", this_table_id).all
+	result_set = DB.fetch("SELECT fire, air, water, earth FROM figures INNER JOIN c_figures on figures.id = c_figures.figure_id WHERE c_figures.chart_id = ? AND c_figures.fig_group = 'Niece' ORDER BY c_figures.id;", this_chart_id).all
+
+	(1..2).each do |e|
+
+		puts "Witness #{e}"
+
+		figure1 = result_set.shift
+		puts figure1
+		figure2 = result_set.shift
+		puts figure2
+
+		figure = add_figure(figure1, figure2)
+
+		figure_id = DB.fetch('SELECT id FROM figures WHERE fire = ? AND air = ? AND water = ? AND earth = ?', figure[:fire_line], figure[:air_line], figure[:water_line], figure[:earth_line]).single_value
+		puts figure_id
+
+		c_figures = DB[:c_figures]
+
+		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Witness', :fig_position => e)
+	end
 
 end
 
 def derive_judge(this_chart_id)
 
-	result_set = DB.fetch("SELECT * FROM figures INNER JOIN c_figures on figures.id = c_figures.fig_id WHERE c_figures.chart_id = ? AND c_figures.fig_group = 'Witness' ORDER BY c_figures.id;", this_table_id).all
+	result_set = DB.fetch("SELECT fire, air, water, earth FROM figures INNER JOIN c_figures on figures.id = c_figures.figure_id WHERE c_figures.chart_id = ? AND c_figures.fig_group = 'Witness' ORDER BY c_figures.id;", this_chart_id).all
 
-	if (fire_new + air_new + water_new + earth_new).odd?
-		print "error"
+	puts "Judge"
+	puts result_set
+
+	figure1 = result_set.shift
+	puts figure1
+	figure2 = result_set.shift
+	puts figure2
+
+	figure = add_figure(figure1, figure2)
+
+	if (figure[:fire_line] + figure[:air_line] + figure[:water_line] + figure[:earth_line]).odd?
+		puts "error"
 	end
+
+	figure_id = DB.fetch('SELECT id FROM figures WHERE fire = ? AND air = ? AND water = ? AND earth = ?', figure[:fire_line], figure[:air_line], figure[:water_line], figure[:earth_line]).single_value
+		puts figure_id
+
+	c_figures = DB[:c_figures]
+
+	c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Judge', :fig_position => 1)
 
 end
 
-
+def get_date
+	chart_date = Date.today
+end
 
 ##########################
 
@@ -155,13 +223,13 @@ post '/chart' do
 	chart_by = params[:chart_by]
 	chart_for = params[:chart_for]
 	chart_subject = params[:chart_subject]
-	chart_date = params[:chart_date]
+	chart_date = Date.today
 	
 	puts chart_name
 
 	c_metadata = DB[:c_metadata]
 
-	chart_id = c_metadata.insert(:chart_name => chart_name, :chart_for => chart_for, :chart_by => chart_by, :chart_subject => chart_subject)
+	chart_id = c_metadata.insert(:chart_name => chart_name, :chart_date => chart_date, :chart_for => chart_for, :chart_by => chart_by, :chart_subject => chart_subject)
 
 	session[:chart_id] = chart_id
 	session[:message] = "Stored id: #{chart_id}."
@@ -177,16 +245,35 @@ post '/chart' do
 		derive_daughter(this_chart_id, e)
 	end
 
-	(1..4).each do |e|
-		derive_figure(this_chart_id, 'Niece', e)
+	derive_niece(this_chart_id)
+
+	derive_witness(this_chart_id)
+
+	derive_judge(this_chart_id)
+
+	chart_figures = DB.fetch('SELECT cf.chart_id, cf.figure_id, cf.fig_group, cf.fig_position, f.name, f.translation, f.image
+		FROM c_figures as cf
+		INNER JOIN figures as f
+		ON cf.figure_id = f.id
+		WHERE cf.chart_id = ?
+		ORDER BY cf.id;', this_chart_id).all
+	puts chart_figures
+
+	#note to self: be very careeful of order, subtle errors can creep in here
+
+	slot_names = ['mother1', 'mother2', 'mother3', 'mother4', 'daughter1', 'daughter2', 'daughter3', 'daughter4', 'niece1', 'niece2', 'niece3', 'niece4', 'witness1', 'witness2', 'judge']
+
+	slot_figures = Hash.new
+
+	slot_names.each do |s|
+	   slot_figures["#{s}"] = chart_figures.shift
 	end
 
-	derive_figure(this_chart_id, 'Right Witness', 1)
+	puts slot_figures
 
-	derive_figure(this_chart_id, 'Left Witness', 1)
+		# figure = result_set.shift
+		#grades["Dorothy Doe"] = 9
 
-	derive_figure(this_chart_id, 'Judge', 1)
-
-	erb :chart, :locals => {:chart_date => chart_date, :chart_name => chart_name, :chart_by => chart_by, :chart_for => chart_for, :chart_subject => chart_subject, :this_chart_id => this_chart_id}
+	erb :chart, :locals => {:chart_date => chart_date, :chart_name => chart_name, :chart_by => chart_by, :chart_for => chart_for, :chart_subject => chart_subject, :this_chart_id => this_chart_id, :slot_figures => slot_figures}
 
 end
