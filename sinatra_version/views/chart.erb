@@ -21,41 +21,45 @@
 
 <header>
 
-<p>Chart name is <b><%= params[:chart_name] %></b>, chart is by <b><%= params[:chart_by] %></b>, chart is for <b><%= params[:chart_for] %></b>, chart is about <b><%= params[:chart_subject] %></b>.</p>
+<p>Chart name is <b><%= chart_name %></b>, chart is by <b><%= chart_by %></b>, chart is for <b><%= chart_for %></b>, chart is about <b><%= chart_subject %></b>, chart created on <b><%= chart_date %></b>.</p>
+<!-- <p>Chart hash is <%= slot_figures %></p> -->
 
+<%= puts "$$$$$" %>
+<%= puts slot_figures["mother1"] %> 
+<%= puts "$$$$$" %>
 </header>
 
 <main>
 	
 	<div class="mother">
 		<ul id="mother">
-			<li id="mother">Fourth Daughter<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="mother">Third Daughter<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="mother">Second Daughter<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="mother">First Daughter<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="mother">Fourth Mother<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="mother">Third Mother<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="mother">Second Mother<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="mother">First Mother<br><img src="/images/laetitia_text.png" id="figure"></li>
+			<li id="mother">Fourth Daughter<br><img src="/images/<%= slot_figures.dig("daughter4", :image) %>" alt="<%= slot_figures.dig("daughter4", :name) %>" title="<%= slot_figures.dig("daughter4", :name) %>: <%= slot_figures.dig("daughter4", :translation) %>" id="figure"></li>
+			<li id="mother">Third Daughter<br><img src="/images/<%= slot_figures.dig("daughter3", :image) %>" alt="<%= slot_figures.dig("daughter3", :name) %>" title="<%= slot_figures.dig("daughter3", :name) %>: <%= slot_figures.dig("daughter3", :translation) %>" id="figure"></li>
+			<li id="mother">Second Daughter<br><img src="/images/<%= slot_figures.dig("daughter2", :image) %>" alt="<%= slot_figures.dig("daughter2", :name) %>" title="<%= slot_figures.dig("daughter2", :name) %>: <%= slot_figures.dig("daughter2", :translation) %>" id="figure"></li>
+			<li id="mother">First Daughter<br><img src="/images/<%= slot_figures.dig("daughter1", :image) %>" alt="<%= slot_figures.dig("daughter1", :name) %>" title="<%= slot_figures.dig("daughter1", :name) %>: <%= slot_figures.dig("daughter1", :translation) %>" id="figure"></li>
+			<li id="mother">Fourth Mother<br><img src="/images/<%= slot_figures.dig("mother4", :image) %>" alt="<%= slot_figures.dig("mother4", :name) %>" title="<%= slot_figures.dig("mother4", :name) %>: <%= slot_figures.dig("mother4", :translation) %>" id="figure"></li>
+			<li id="mother">Third Mother<br><img src="/images/<%= slot_figures.dig("mother3", :image) %>" alt="<%= slot_figures.dig("mother3", :name) %>" title="<%= slot_figures.dig("mother3", :name) %>: <%= slot_figures.dig("mother3", :translation) %>" id="figure"></li>
+			<li id="mother">Second Mother<br><img src="/images/<%= slot_figures.dig("mother2", :image) %>" alt="<%= slot_figures.dig("mother2", :name) %>" title="<%= slot_figures.dig("mother2", :name) %>: <%= slot_figures.dig("mother2", :translation) %>" id="figure"></li>
+			<li id="mother">First Mother<br><img src="/images/<%= slot_figures.dig("mother1", :image) %>" alt="<%= slot_figures.dig("mother1", :name) %>" title="<%= slot_figures.dig("mother1", :name) %>: <%= slot_figures.dig("mother1", :translation) %>" id="figure"></li>
 		</ul>
 	</div>
 	<div class="niece">
 		<ul id="niece">
-			<li id="niece">Fourth Niece<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="niece">Third Niece<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="niece">Second Niece<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="niece">First Niece<br><img src="/images/laetitia_text.png" id="figure"></li>
+			<li id="niece">Fourth Niece<br><img src="/images/<%= slot_figures.dig("niece4", :image) %>" alt="<%= slot_figures.dig("niece4", :name) %>" title="<%= slot_figures.dig("niece4", :name) %>: <%= slot_figures.dig("niece4", :translation) %>" id="figure"></li>
+			<li id="niece">Third Niece<br><img src="/images/<%= slot_figures.dig("niece3", :image) %>" alt="<%= slot_figures.dig("niece3", :name) %>" title="<%= slot_figures.dig("niece3", :name) %>: <%= slot_figures.dig("niece3", :translation) %>" id="figure"></li>
+			<li id="niece">Second Niece<br><img src="/images/<%= slot_figures.dig("niece2", :image) %>" alt="<%= slot_figures.dig("niece2", :name) %>" title="<%= slot_figures.dig("niece2", :name) %>: <%= slot_figures.dig("niece2", :translation) %>" id="figure"></li>
+			<li id="niece">First Niece<br><img src="/images/<%= slot_figures.dig("niece1", :image) %>" alt="<%= slot_figures.dig("niece1", :name) %>" title="<%= slot_figures.dig("niece1", :name) %>: <%= slot_figures.dig("niece1", :translation) %>" id="figure"></li>
 		</ul>
 	</div>
 	<div class="witness">
 		<ul id="witness">
-			<li id="witness">Left Witness<br><img src="/images/laetitia_text.png" id="figure"></li>
-			<li id="witness">Right Witness<br><img src="/images/laetitia_text.png" id="figure"></li>
+			<li id="witness">Left Witness<br><img src="/images/<%= slot_figures.dig("witness2", :image) %>" alt="<%= slot_figures.dig("witness2", :name) %>" title="<%= slot_figures.dig("witness2", :name) %>: <%= slot_figures.dig("witness2", :translation) %>" id="figure"></li>
+			<li id="witness">Right Witness<br><img src="/images/<%= slot_figures.dig("witness1", :image) %>" alt="<%= slot_figures.dig("witness1", :name) %>" title="<%= slot_figures.dig("witness1", :name) %>: <%= slot_figures.dig("witness1", :translation) %>" id="figure"></li>
 		</ul>
 	</div>
 	<div class="judge">
 		<ul id="judge">
-			<li id="judge">Judge<br><img src="/images/laetitia_text.png" id="figure"></li>
+			<li id="judge">Judge<br><img src="/images/<%= slot_figures.dig("judge", :image) %>" alt="<%= slot_figures.dig("judge", :name) %>" title="<%= slot_figures.dig("judge", :name) %>: <%= slot_figures.dig("judge", :translation) %>" id="figure"></li>
 		</ul>
 	</div>
 </main>
