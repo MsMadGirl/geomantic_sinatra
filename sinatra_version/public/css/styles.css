@@ -19,7 +19,7 @@ div#wrapper {
 }
 
 header {
-	height:80px;
+	height:30px;
 	margin:50px;
 	
 }
@@ -30,9 +30,10 @@ main {
 }
 
 aside {
-	width:360px;
+	width:auto;
 	margin-right:20px;
 	float:right;
+	padding-top:50px;
 }
 
 div#mother {
