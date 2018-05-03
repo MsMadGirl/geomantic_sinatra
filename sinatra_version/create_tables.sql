@@ -28,13 +28,3 @@ INSERT INTO figures (fire, air, water, earth, name, translation, image) VALUES (
 INSERT INTO figures (fire, air, water, earth, name, translation, image) VALUES (2, 2, 2, 1, 'Tristitia', 'Sorrow', 'tristitia_text.png'); 
 INSERT INTO figures (fire, air, water, earth, name, translation, image) VALUES (2, 2, 2, 2, 'Populus', 'People', 'populus_text.png');
 
-
-
-
-
-
-
-
-SELECT $element FROM figures INNER JOIN c_figures ON figures.id = c_figures.fig_id WHERE c_figures.chart_id = $this_chart_id;
-
-SELECT * FROM figures INNER JOIN c_figures on figures.id = c_figures.fig_id WHERE c_figures.chart_id = ?;
