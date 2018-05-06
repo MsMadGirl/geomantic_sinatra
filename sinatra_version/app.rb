@@ -5,7 +5,11 @@ require 'sequel'
 require 'erubis'
 require 'pg'
 require 'date'
-# require 'sequel_pg'
+
+
+configure do 
+   set :bind, '0.0.0.0'
+end
 
 helpers do
 	include Rack::Utils
@@ -20,7 +24,7 @@ helpers do
 	end 
 end
 
-DB = Sequel.postgres('geomantic', host: 'localhost')
+DB = Sequel.postgres('geomantic', host: 'localhost', :user=>'postgres',:password=>'***')
 
 enable :sessions
 
@@ -56,6 +60,28 @@ def generate_mother (chart_id, fig_position)
 	c_figures.insert(:chart_id => chart_id, :figure_id => figure_id, :fig_group => 'Mother', :fig_position => fig_position)
 
 end
+
+def load_mother (chart_id, mother1, mother2, mother3, mother4)
+
+	mothers = [mother1, mother2, mother3, mother4]
+
+	mothers.each_with_index do |mother, idx|
+
+		puts "@@@@@"
+		puts mother, idx
+		puts "@@@@@"
+
+		fig_position = idx+1
+
+		figure_id = DB.fetch('SELECT id FROM figures WHERE name = ?', mother)
+
+		c_figures = DB[:c_figures]
+
+		c_figures.insert(:chart_id => chart_id, :figure_id => figure_id, :fig_group => 'Mother', :fig_position => fig_position)
+	end
+
+end
+
 
 #derives daughters from mothers by looking up the line values of all figures in geomantic.c_figures with the correct chart_id, which at this point will only be mothers, assembles the lines of the mothers into the daughters, and writes the new figures to geomantic.c_figures
 def derive_daughter (this_chart_id, d_fig_position)
@@ -202,36 +228,53 @@ def derive_judge(this_chart_id)
 	c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Judge', :fig_position => 1)
 
 	if (figure[:fire_line] + figure[:air_line] + figure[:water_line] + figure[:earth_line]).odd?
-		error = "<p style=\"color:red;\">Error: Judge is odd. If you see this error, please email hexdotink@gmail.com</p>"
+		judge_error = "<p style=\"color:red;\">Error: Judge is odd. If you see this error, please email hexdotink@gmail.com</p>"
 	else 
-		error = ""
+		judge_error = ""
 	end
 
 end
 
-##########################
-#routes below this
-##########################
+def the_rest(this_chart_id)
+	
+
+	return slot_figures
+end
+
+#########################
+#   routes below this   #
+#########################
 
 #gets the index, which has the chart metadata form
 get '/' do
-	erb :index
+	mothers_message = session[:mothers_message]
+	erb :index, :locals => {:mothers_message => mothers_message}
 end
 
 #posts the params from the index form, stores them in the geomantic.c_metadata table, creates and displays the shield chart
-post '/chart' do
+post '/generate' do
 	
+	session[:mothers_message] = ""
 	chart_name = params[:chart_name]
 	chart_by = params[:chart_by]
 	chart_for = params[:chart_for]
 	chart_subject = params[:chart_subject]
+	mother1 = params[:mother1]
+	mother2 = params[:mother2]
+	mother3 = params[:mother3]
+	mother4 = params[:mother4]
 	chart_date = Date.today
+	judge_error = ""
+	hex_key = SecureRandom.hex(8)
+	# puts "*****"
+	# puts hex_key
+	# puts "*****"
 	
 	# puts chart_name
 
 	c_metadata = DB[:c_metadata]
 
-	chart_id = c_metadata.insert(:chart_name => chart_name, :chart_date => chart_date, :chart_for => chart_for, :chart_by => chart_by, :chart_subject => chart_subject)
+	chart_id = c_metadata.insert(:chart_name => chart_name, :chart_date => chart_date, :chart_for => chart_for, :chart_by => chart_by, :chart_subject => chart_subject, :hex_key => hex_key)
 
 	session[:chart_id] = chart_id
 	session[:message] = "Stored id: #{chart_id}."
@@ -239,26 +282,74 @@ post '/chart' do
 	this_chart_id = session[:chart_id]
 	# puts message
 
-	(1..4).each do |e|
-		generate_mother(this_chart_id, e)
+	dropdownerror = ""
+
+	if (mother1 == "" && mother2 == "" && mother3 == "" && mother4 == "")
+		(1..4).each do |e|
+			generate_mother(this_chart_id, e)
+		end
+	elsif (mother1 == "" || mother2 == "" || mother3 == "" || mother4 == "")
+		session[:mothers_message] = "Please select all the Mothers or none."
+		dropdownerror = "x"
+		redirect back
+	else
+		load_mother(this_chart_id, mother1, mother2, mother3, mother4)
 	end
 
-	(1..4).each do |e|
-		derive_daughter(this_chart_id, e)
+
+
+	if dropdownerror == ""
+		
+		(1..4).each do |e|
+			derive_daughter(this_chart_id, e)
+		end
+
+		derive_niece(this_chart_id)
+
+		derive_witness(this_chart_id)
+
+		judge_error = derive_judge(this_chart_id)
+
+	
+
+	else
+
+		slot_names = ['mother1', 'mother2', 'mother3', 'mother4', 'daughter1', 'daughter2', 'daughter3', 'daughter4', 'niece1', 'niece2', 'niece3', 'niece4', 'witness1', 'witness2', 'judge']
+
+		slot_figures = Hash.new
+
+		slot_names.each do |s|
+		   slot_figures["#{s}"] = nil
+		end
+
+		
+
 	end
 
-	derive_niece(this_chart_id)
+	redirect to("/chart/#{hex_key}")
 
-	derive_witness(this_chart_id)
+	erb :generate, :locals => {:chart_date => chart_date, :chart_name => chart_name, :chart_by => chart_by, :chart_for => chart_for, :chart_subject => chart_subject, :this_chart_id => this_chart_id, :slot_figures => slot_figures, :judge_error => judge_error, :mother1 => mother1, :mother2 => mother2, :mother3 => mother3, :mother4 => mother4, :dropdownerror => dropdownerror, :hex_key => hex_key, :message => message, :mothers_message => mothers_message}
 
-	error = derive_judge(this_chart_id)
+end
+
+get '/chart/:hex_key' do
+
+	hex_key = params[:hex_key]
+
+	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key)
+
+	puts "@@@@@"
+	puts chart_metadata
+	puts "@@@@@"
 
 	chart_figures = DB.fetch('SELECT cf.chart_id, cf.figure_id, cf.fig_group, cf.fig_position, f.name, f.translation, f.image
 		FROM c_figures as cf
+		INNER JOIN c_metadata as cm
+		ON cf.chart_id = cm.id
 		INNER JOIN figures as f
 		ON cf.figure_id = f.id
-		WHERE cf.chart_id = ?
-		ORDER BY cf.id;', this_chart_id).all
+		WHERE cm.hex_key = ?
+		ORDER BY cf.id;', hex_key).all
 	# puts chart_figures
 
 	slot_names = ['mother1', 'mother2', 'mother3', 'mother4', 'daughter1', 'daughter2', 'daughter3', 'daughter4', 'niece1', 'niece2', 'niece3', 'niece4', 'witness1', 'witness2', 'judge']
@@ -269,8 +360,7 @@ post '/chart' do
 	   slot_figures["#{s}"] = chart_figures.shift
 	end
 
-	# puts slot_figures
+	puts slot_figures
 
-	erb :chart, :locals => {:chart_date => chart_date, :chart_name => chart_name, :chart_by => chart_by, :chart_for => chart_for, :chart_subject => chart_subject, :this_chart_id => this_chart_id, :slot_figures => slot_figures, :error => error}
-
+	erb :chart, :locals => {:hex_key => hex_key, :slot_figures => slot_figures}
 end
