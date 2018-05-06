@@ -19,41 +19,134 @@
 
 <header>
 <center><h1>Geomantic</h1></center>
+<center><h1 id="error"><%= mothers_message %></h1></center>
 </header>
 
 <main>
-	<div id="form">
-	<center>
-		<form method="POST" action="/chart">
 
-			Chart Name:<br>
-			<input type="text" name="chart_name"><br><br>
+	<form method="POST" action="/generate">
+		<div id="superform">
 
-			Chart Created By:<br>
-			<input type="text" name="chart_by"><br><br>
+			<div id="formleft">
+				<br><br><br>
+				Chart Name:<br>
+				<input type="text" name="chart_name"><br><br>
 
-			Chart Created For:<br>
-			<input type="text" name="chart_for"><br><br>
+				Chart Created By:<br>
+				<input type="text" name="chart_by"><br><br>
 
-			Chart Subject:<br>
-			<input type="text" name="chart_subject"><br><br>
+				Chart Created For:<br>
+				<input type="text" name="chart_for"><br><br>
 
-			<input type="submit">
+				Chart Subject:<br>
+				<input type="text" name="chart_subject"><br><br>
 
-		</form>
-	</center>
-	</div>
+			</div><!-- formleft -->
+			<div id="formright">
+				<p>If you wish to enter a set of Mothers you have cast separately, please select them from these dropdowns:</p>
+
+				First Mother:<br>
+				<select name='mother1' id='mother1'> 
+					<option value='' selected></option> 
+					<option value='Via'>Via</option>
+					<option value='Cauda Draconis'>Cauda Draconis</option>
+					<option value='Puer'>Puer</option>
+					<option value='Fortuna Minor'>Fortuna Minor</option>
+					<option value='Puella'>Puella</option>
+					<option value='Amissio'>Amissio</option>
+					<option value='Carcer'>Carcer</option>
+					<option value='Laetitia'>Laetitia</option>
+					<option value='Caput Draconis'>Caput Draconis</option>
+					<option value='Conjunctio'>Conjunctio</option>
+					<option value='Acquisitio'>Acquisitio</option>
+					<option value='Rubeus'>Rubeus</option>
+					<option value='Fortuna Major'>Fortuna Major</option>
+					<option value='Albus'>Albus</option>
+					<option value='Tristitia'>Tristitia</option>
+					<option value='Populus'>Populus</option>
+				</select>
+				<br><br>
+				Second Mother:<br>
+				<select name='mother2' id='mother2'> 
+					<option value='' selected></option> 
+					<option value='Via'>Via</option>
+					<option value='Cauda Draconis'>Cauda Draconis</option>
+					<option value='Puer'>Puer</option>
+					<option value='Fortuna Minor'>Fortuna Minor</option>
+					<option value='Puella'>Puella</option>
+					<option value='Amissio'>Amissio</option>
+					<option value='Carcer'>Carcer</option>
+					<option value='Laetitia'>Laetitia</option>
+					<option value='Caput Draconis'>Caput Draconis</option>
+					<option value='Conjunctio'>Conjunctio</option>
+					<option value='Acquisitio'>Acquisitio</option>
+					<option value='Rubeus'>Rubeus</option>
+					<option value='Fortuna Major'>Fortuna Major</option>
+					<option value='Albus'>Albus</option>
+					<option value='Tristitia'>Tristitia</option>
+					<option value='Populus'>Populus</option>
+				</select> 
+				<br><br>
+				Third Mother:<br>
+				<select name='mother3' id='mother3'> 
+					<option value='' selected></option> 
+					<option value='Via'>Via</option>
+					<option value='Cauda Draconis'>Cauda Draconis</option>
+					<option value='Puer'>Puer</option>
+					<option value='Fortuna Minor'>Fortuna Minor</option>
+					<option value='Puella'>Puella</option>
+					<option value='Amissio'>Amissio</option>
+					<option value='Carcer'>Carcer</option>
+					<option value='Laetitia'>Laetitia</option>
+					<option value='Caput Draconis'>Caput Draconis</option>
+					<option value='Conjunctio'>Conjunctio</option>
+					<option value='Acquisitio'>Acquisitio</option>
+					<option value='Rubeus'>Rubeus</option>
+					<option value='Fortuna Major'>Fortuna Major</option>
+					<option value='Albus'>Albus</option>
+					<option value='Tristitia'>Tristitia</option>
+					<option value='Populus'>Populus</option>
+				</select> 
+				<br><br>
+				Fourth Mother:<br>
+				<select name='mother4' id='mother4'>
+					<option value='' selected></option> 
+					<option value='Via'>Via</option>
+					<option value='Cauda Draconis'>Cauda Draconis</option>
+					<option value='Puer'>Puer</option>
+					<option value='Fortuna Minor'>Fortuna Minor</option>
+					<option value='Puella'>Puella</option>
+					<option value='Amissio'>Amissio</option>
+					<option value='Carcer'>Carcer</option>
+					<option value='Laetitia'>Laetitia</option>
+					<option value='Caput Draconis'>Caput Draconis</option>
+					<option value='Conjunctio'>Conjunctio</option>
+					<option value='Acquisitio'>Acquisitio</option>
+					<option value='Rubeus'>Rubeus</option>
+					<option value='Fortuna Major'>Fortuna Major</option>
+					<option value='Albus'>Albus</option>
+					<option value='Tristitia'>Tristitia</option>
+					<option value='Populus'>Populus</option>
+				</select> 
+			</div><!-- formright -->
+			<br>
+		</div><!-- formsuper -->
+		<div id="under">
+			<center><input type="submit"></center>
+		</div>
+		
+	</form>
 </main>
 
 <aside>
 	<h1>Welcome to Geomantic.</h1>
-	<p>Geomantic is a web app for creating and storing geomancy charts. It is, as of 5/2/2018, still in its alpha phase. It is not currently possible to look up previous charts, even though they are stored. (You can email me at <a href="mailto:hexdotink@gmail.com">hexdotink@gmail.com</a> if you'd like a particular stored chart.) Eventually, it will be possible to log in, store charts with your login, and look them up. It will also be possible to enter the first four figures, the Mothers, so that you can store charts you have created offline. Further out, there are plans to make it possible to email yourself or someone else a chart.</p>
+	<p>Geomantic is a web app for creating and storing geomancy charts. It is, as of 5/2/2018, still in its alpha phase. It is not currently possible to look up previous charts, even though they are stored. (You can email me at <a href="mailto:hexdotink@gmail.com">hexdotink@gmail.com</a> if you'd like a particular stored chart.) Eventually, it will be possible to log in, store charts with your login, and look them up. As of 5/4/2018, it is possible to enter the first four figures, the Mothers, so that you can store charts you have created offline (only the first four need to be stored to recreate a chart).</p>
 	<p>What's geomancy? Geomancy is a system of divination which was popular in medieval Europe, although today it is quite obscure. Geomancy relies on a set of sixteen figure, each figure made up of four lines of binary values -- like the hexagrams of the I Ching, only with fewer lines. Each line represents a different classical element (fire, air, water, earth), and has either one point or two points. Four such figures are generated by random means -- dots drawn on paper, coin flips, dice rolls, whatever -- and plugged into the first four slots of a shield-shaped chart with fifteen such slots. The rest of the figures are generated by manipulating the first four figures and their derivatives. Divination can be done solely with the Shield Chart, or the figures can be transcribed into a square, 12-slot chart based on the houses of the zodiac, which can provide a more nuanced reading. If you'd like to know more, <a href="https://www.princeton.edu/~ezb/geomancy/geostep.html">this page</a> has some good general information.</p>
-	<p>This app is simply intended to generate the first four and derive the other eleven figures so that a geomancer can fill in the charts without actually having to do the math involved, because I always screw up at least one of the figures.</p>
+	<p>This app is simply intended to generate or accept the first four and derive the other eleven figures so that a geomancer can fill in the charts without actually having to do the math involved, because I always screw up at least one of the figures.</p>
 	<p>I don't currently have meanings for the figures stored, nor do I have a way to view a 12 Houses chart, only a Shield Chart. If anyone would like to volunteer to write the former for me to use, again, contact me at <a href="mailto:hexdotink@gmail.com">hexdotink@gmail.com</a>, because at the moment, I don't have the time or energy to write them. I'll probably eventually make the latter available, but I have to figure out how to lay it out in HTML and CSS first, and I really don't like those.</p>
 </aside>
 <footer>
-	<ul><li>Geomantic is copyright 2018 Rebecca Lynde-Scott.</li></ul>
+	<ul><li>Geomantic is &#169; 2018 Rebecca Lynde-Scott.</li></ul>
 </footer>
 
 
