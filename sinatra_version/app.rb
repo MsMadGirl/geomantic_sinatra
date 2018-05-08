@@ -5,6 +5,7 @@ require 'sequel'
 require 'erubis'
 require 'pg'
 require 'date'
+require 'sinatra/multi_route'
 
 
 configure do 
@@ -51,13 +52,19 @@ def generate_mother (chart_id, fig_position)
 	# puts air_line
 	# puts water_line
 	# puts earth_line
+	child_group = "Niece"
+	if fig_position == 1 || 2
+		child_position = 1
+	else
+		child_position = 2
+	end
 
 	figure_id = DB.fetch('SELECT id FROM figures WHERE fire = ? AND air = ? AND water = ? AND earth = ?', fire_line, air_line, water_line, earth_line).single_value
 	# puts "figure id: #{figure_id}"
 
 	c_figures = DB[:c_figures]
 
-	c_figures.insert(:chart_id => chart_id, :figure_id => figure_id, :fig_group => 'Mother', :fig_position => fig_position)
+	c_figures.insert(:chart_id => chart_id, :figure_id => figure_id, :fig_group => 'Mother', :fig_position => fig_position, :child_group => child_group, :child_position => child_position)
 
 end
 
@@ -73,7 +80,7 @@ def load_mother (chart_id, mother1, mother2, mother3, mother4)
 
 		fig_position = idx+1
 
-		figure_id = DB.fetch('SELECT id FROM figures WHERE name = ?', mother)
+		figure_id = DB.fetch('SELECT id FROM figures WHERE fig_name = ?', mother)
 
 		c_figures = DB[:c_figures]
 
@@ -114,9 +121,16 @@ def derive_daughter (this_chart_id, d_fig_position)
 	figure_id = DB.fetch('SELECT id FROM figures WHERE fire = ? AND air = ? AND water = ? AND earth = ?', fire_line, air_line, water_line, earth_line).single_value
 	# puts "figure id: #{figure_id}"
 
+	child_group = "Niece"
+	if d_fig_position == 1 || 2
+		child_position = 3
+	else
+		child_position = 4
+	end
+
 	c_figures = DB[:c_figures]
 
-	c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Daughter', :fig_position => d_fig_position)
+	c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Daughter', :fig_position => d_fig_position, :child_group => child_group, :child_position => child_position)
 
 end
 
@@ -157,6 +171,31 @@ def derive_niece (this_chart_id)
 
 	(1..4).each do |e|
 
+		if e == 1
+			parent_group = 'Mother'
+			parent_right_position = 1
+			parent_left_position = 2
+		elsif e == 2
+			parent_group = 'Mother'
+			parent_right_position = 3
+			parent_left_position = 4
+		elsif e == 3
+			parent_group = 'Daughter'
+			parent_right_position = 1
+			parent_left_position = 2
+		else
+			parent_group = 'Daughter'
+			parent_right_position = 3
+			parent_left_position = 4
+		end
+
+		child_group = "Witness"
+		if e == 1
+			child_position = 1
+		else
+			child_position = 2
+		end
+
 		# puts "Niece #{e}"
 		figure1 = result_set.shift
 		# puts figure1
@@ -174,7 +213,7 @@ def derive_niece (this_chart_id)
 
 		c_figures = DB[:c_figures]
 
-		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Niece', :fig_position => e)
+		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Niece', :fig_position => e, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position, :child_group => child_group, :child_position => child_position)
 	end
 	
 end
@@ -188,6 +227,16 @@ def derive_witness(this_chart_id)
 
 		# puts "Witness #{e}"
 
+		parent_group = 'Niece'
+
+		if e == 1
+			parent_right_position = 1
+			parent_left_position = 2
+		else
+			parent_right_position = 3
+			parent_left_position = 4
+		end
+
 		figure1 = result_set.shift
 		# puts figure1
 		figure2 = result_set.shift
@@ -200,7 +249,7 @@ def derive_witness(this_chart_id)
 
 		c_figures = DB[:c_figures]
 
-		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Witness', :fig_position => e)
+		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Witness', :fig_position => e, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position, :child_group => 'Judge', :child_position => 1)
 	end
 
 end
@@ -212,6 +261,10 @@ def derive_judge(this_chart_id)
 
 	# puts "Judge"
 	# puts result_set
+
+	parent_group = 'Witness'
+	parent_right_position = 1
+	parent_left_position = 2
 
 	figure1 = result_set.shift
 	# puts figure1
@@ -225,7 +278,7 @@ def derive_judge(this_chart_id)
 
 	c_figures = DB[:c_figures]
 
-	c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Judge', :fig_position => 1)
+	c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Judge', :fig_position => 1, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position)
 
 	if (figure[:fire_line] + figure[:air_line] + figure[:water_line] + figure[:earth_line]).odd?
 		judge_error = "<p style=\"color:red;\">Error: Judge is odd. If you see this error, please email hexdotink@gmail.com</p>"
@@ -332,17 +385,61 @@ post '/generate' do
 
 end
 
-get '/chart/:hex_key' do
+route :get, :post, '/chart/:hex_key' do
+
+	hex_key = params[:hex_key]
+	notes = params[:notes]
+
+	puts "*****"
+	puts params.to_hash
+	puts "*****"
+
+	if notes != nil
+		DB[:c_metadata].update(notes: notes)
+	end
+
+	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key).all
+
+	# puts "@@@@@"
+	# puts chart_metadata.inspect
+	# puts "@@@@@"
+
+	these_notes = chart_metadata.dig(0, :notes)
+	puts these_notes
+
+	chart_figures = DB.fetch('SELECT cf.chart_id, cf.figure_id, cf.fig_group, cf.fig_position, f.fig_name, f.translation, f.image
+		FROM c_figures as cf
+		INNER JOIN c_metadata as cm
+		ON cf.chart_id = cm.id
+		INNER JOIN figures as f
+		ON cf.figure_id = f.id
+		WHERE cm.hex_key = ?
+		ORDER BY cf.id;', hex_key).all
+	# puts chart_figures
+
+	slot_names = ['mother1', 'mother2', 'mother3', 'mother4', 'daughter1', 'daughter2', 'daughter3', 'daughter4', 'niece1', 'niece2', 'niece3', 'niece4', 'witness1', 'witness2', 'judge']
+
+	slot_figures = Hash.new
+
+	slot_names.each do |s|
+	   slot_figures["#{s}"] = chart_figures.shift
+	end
+
+	# puts slot_figures
+
+	erb :chart, :locals => {:hex_key => hex_key, :slot_figures => slot_figures, :chart_metadata => chart_metadata, :notes => notes, :these_notes => these_notes}
+end
+
+get '/chart_notes_edit/:hex_key' do
 
 	hex_key = params[:hex_key]
 
-	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key)
+	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key).all
 
-	puts "@@@@@"
-	puts chart_metadata
-	puts "@@@@@"
+	these_notes = chart_metadata.dig(0, :notes)
+	puts these_notes
 
-	chart_figures = DB.fetch('SELECT cf.chart_id, cf.figure_id, cf.fig_group, cf.fig_position, f.name, f.translation, f.image
+	chart_figures = DB.fetch('SELECT cf.chart_id, cf.figure_id, cf.fig_group, cf.fig_position, f.fig_name, f.translation, f.image
 		FROM c_figures as cf
 		INNER JOIN c_metadata as cm
 		ON cf.chart_id = cm.id
@@ -362,5 +459,147 @@ get '/chart/:hex_key' do
 
 	puts slot_figures
 
-	erb :chart, :locals => {:hex_key => hex_key, :slot_figures => slot_figures}
+	erb :chart_notes_edit, :locals => {:hex_key => hex_key, :slot_figures => slot_figures, :chart_metadata => chart_metadata, :these_notes => these_notes}
+end
+
+route :get, :post, '/houses/:hex_key' do
+
+	hex_key = params[:hex_key]
+	notes = params[:notes]
+
+	if notes != nil
+		DB[:c_metadata].update(notes: notes)
+	end
+
+	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key).all
+
+	these_notes = chart_metadata.dig(0, :notes)
+	puts "houses"
+	puts these_notes
+
+	chart_figures = DB.fetch('SELECT cf.chart_id, cf.figure_id, cf.fig_group, cf.fig_position, f.fig_name, f.translation, f.image
+		FROM c_figures as cf
+		INNER JOIN c_metadata as cm
+		ON cf.chart_id = cm.id
+		INNER JOIN figures as f
+		ON cf.figure_id = f.id
+		WHERE cm.hex_key = ?
+		ORDER BY cf.id;', hex_key).all
+	# puts chart_figures
+
+	house_names = ['house1', 'house2', 'house3', 'house4', 'house5', 'house6', 'house7', 'house8', 'house9', 'house10', 'house11', 'house12']
+
+	house_figures = Hash.new
+
+	house_names.each do |s|
+	   house_figures["#{s}"] = chart_figures.shift
+	end
+
+	erb :houses, :locals => {:hex_key => hex_key, :house_figures => house_figures, :chart_metadata => chart_metadata, :these_notes => these_notes}
+
+end
+
+get '/houses_notes_edit/:hex_key' do
+
+	hex_key = params[:hex_key]
+
+	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key).all
+	these_notes = chart_metadata.dig(0, :notes)
+	puts these_notes
+
+	chart_figures = DB.fetch('SELECT cf.chart_id, cf.figure_id, cf.fig_group, cf.fig_position, f.fig_name, f.translation, f.image
+		FROM c_figures as cf
+		INNER JOIN c_metadata as cm
+		ON cf.chart_id = cm.id
+		INNER JOIN figures as f
+		ON cf.figure_id = f.id
+		WHERE cm.hex_key = ?
+		ORDER BY cf.id;', hex_key).all
+	# puts chart_figures
+
+	house_names = ['house1', 'house2', 'house3', 'house4', 'house5', 'house6', 'house7', 'house8', 'house9', 'house10', 'house11', 'house12']
+
+	house_figures = Hash.new
+
+	house_names.each do |s|
+	   house_figures["#{s}"] = chart_figures.shift
+	end
+
+	puts "wtf"
+
+	erb :houses_notes_edit, :locals => {:hex_key => hex_key, :house_figures => house_figures, :chart_metadata => chart_metadata, :these_notes => these_notes}
+
+end
+
+route :get, :post, '/way_of_points/:hex_key' do
+
+	hex_key = params[:hex_key]
+	# notes = params[:notes]
+
+	# DB[:c_metadata].update(notes: notes)
+
+	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key).all
+
+	puts "@@@@@"
+	puts chart_metadata.inspect
+	puts "@@@@@"
+
+	notes = chart_metadata.dig(0, :notes)
+
+	judge = DB.fetch("SELECT fig_name, fire FROM figures AS f
+		INNER JOIN c_figures AS cf
+		ON f.id = cf.figure_id
+		INNER JOIN c_metadata AS cm
+		ON cf.chart_id = cm.id
+		WHERE cf.fig_group = 'Judge' AND cm.hex_key = ?;", hex_key).all
+
+	point = judge.dig(0, :fire)
+
+	puts "^^^^^"
+	puts judge.inspect
+	puts "^^^^^"
+	puts point
+	puts "^^^^^"
+
+	chart_figures = DB.fetch('SELECT cf.chart_id, cf.figure_id, cf.fig_group, cf.fig_position, f.fig_name, f.translation, f.image, f.image_grey, f.fire, cf.parent_group, cf.parent_left_position, cf.parent_right_position, cf.child_group, cf.child_position
+		FROM c_figures as cf
+		INNER JOIN c_metadata as cm
+		ON cf.chart_id = cm.id
+		INNER JOIN figures as f
+		ON cf.figure_id = f.id
+		WHERE cm.hex_key = ?
+		ORDER BY cf.id DESC;', hex_key).all
+
+	puts "^^^^^"
+	puts chart_figures.inspect
+	puts "^^^^^"
+
+	chart_figures.each do |figure|
+
+		image_grey = figure[:image_grey]
+		puts "*** #{image_grey} ***"
+		fire = figure[:fire]
+		puts "*** #{fire} ***"
+
+		if fire != point 
+			figure[:image] = image_grey
+			puts figure[:fig_name] + " should be grey"
+		end
+	end
+
+	puts "@@@@@"
+	puts chart_figures.inspect
+	puts "@@@@@"
+
+	slot_names = ["judge", "witness2", "witness1", "niece4", "niece3", "niece2", "niece1", "daughter4", "daughter3", "daughter2", "daughter1", "mother4", "mother3", "mother2", "mother1"]
+
+	slot_figures = Hash.new
+
+	slot_names.each do |s|
+	   slot_figures["#{s}"] = chart_figures.shift
+	end
+
+	# puts slot_figures
+
+	erb :way_of_points, :locals => {:hex_key => hex_key, :slot_figures => slot_figures, :chart_metadata => chart_metadata, :notes => notes}
 end
