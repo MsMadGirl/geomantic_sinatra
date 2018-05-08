@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset="UTF-8">
+<title>Geomantic</title>
+
+<!--Remy Sharp Shim -->
+<!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js">
+</script>
+<![endif]-->
+
+<link rel="stylesheet" type="text/css" href="/css/styles.css">
+
+
+
+</head>
+<body id="geomantic">
+
+<header>
+<center><h1>Geomantic</h1></center>
+</header>
+
+<main>
+
+	<div id="houserow">
+		<div id="house">
+			<ul id="house"><li id="house">Fifth House<br><img src="/images/<%= house_figures.dig("house5", :image) %>" alt="<%= house_figures.dig("house5", :fig_name) %>" title="<%= house_figures.dig("house5", :fig_name) %>: <%= house_figures.dig("house5", :translation) %>" id="figure"></li></ul>
+		</div>
+		<div id="house">
+			<ul id="house"><li id="house">Sixth House<br><img src="/images/<%= house_figures.dig("house6", :image) %>" alt="<%= house_figures.dig("house6", :fig_name) %>" title="<%= house_figures.dig("house6", :fig_name) %>: <%= house_figures.dig("house6", :translation) %>" id="figure"></li></ul>
+		</div>
+		<div id="house">
+			<ul id="house"><li id="house">Seventh House<br><img src="/images/<%= house_figures.dig("house7", :image) %>" alt="<%= house_figures.dig("house7", :fig_name) %>" title="<%= house_figures.dig("house7", :fig_name) %>: <%= house_figures.dig("house7", :translation) %>" id="figure"></li></ul>
+		</div>
+		<div id="house">
+			<ul id="house"><li id="house">Eighth House<br><img src="/images/<%= house_figures.dig("house8", :image) %>" alt="<%= house_figures.dig("house8", :fig_name) %>" title="<%= house_figures.dig("house8", :fig_name) %>: <%= house_figures.dig("house8", :translation) %>" id="figure"></li></ul>
+		</div>
+	</div>
+	<div id="houserow">
+		<div id="house">
+			<ul id="house"><li id="house">Fourth House<br><img src="/images/<%= house_figures.dig("house4", :image) %>" alt="<%= house_figures.dig("house4", :fig_name) %>" title="<%= house_figures.dig("house4", :fig_name) %>: <%= house_figures.dig("house4", :translation) %>" id="figure"></li></ul>
+		</div>
+		<div id="house">
+		</div>
+		<div id="house">
+		</div>
+		<div id="house">
+			<ul id="house"><li id="house">Ninth House<br><img src="/images/<%= house_figures.dig("house9", :image) %>" alt="<%= house_figures.dig("house9", :fig_name) %>" title="<%= house_figures.dig("house9", :fig_name) %>: <%= house_figures.dig("house9", :translation) %>" id="figure"></li></ul>
+		</div>
+	</div>
+	<div id="houserow">
+		<div id="house">
+			<ul id="house"><li id="house">Third House<br><img src="/images/<%= house_figures.dig("house3", :image) %>" alt="<%= house_figures.dig("house3", :fig_name) %>" title="<%= house_figures.dig("house3", :fig_name) %>: <%= house_figures.dig("house3", :translation) %>" id="figure"></li></ul>
+		</div>
+		<div id="house">
+		</div>
+		<div id="house">
+		</div>
+		<div id="house">
+			<ul id="house"><li id="house">Tenth House<br><img src="/images/<%= house_figures.dig("house10", :image) %>" alt="<%= house_figures.dig("house10", :fig_name) %>" title="<%= house_figures.dig("house10", :fig_name) %>: <%= house_figures.dig("house10", :translation) %>" id="figure"></li></ul>
+		</div>
+	</div>
+	<div id="houserow">
+		<div id="house">
+			<ul id="house"><li id="house">Second House<br><img src="/images/<%= house_figures.dig("house2", :image) %>" alt="<%= house_figures.dig("house2", :fig_name) %>" title="<%= house_figures.dig("house2", :fig_name) %>: <%= house_figures.dig("house2", :translation) %>" id="figure"></li></ul>
+		</div>
+		<div id="house">
+			<ul id="house"><li id="house">First House<br><img src="/images/<%= house_figures.dig("house1", :image) %>" alt="<%= house_figures.dig("house1", :fig_name) %>" title="<%= house_figures.dig("house1", :fig_name) %>: <%= house_figures.dig("house1", :translation) %>" id="figure"></li></ul>
+		</div>
+		<div id="house">
+			<ul id="house"><li id="house">Twelfth House<br><img src="/images/<%= house_figures.dig("house12", :image) %>" alt="<%= house_figures.dig("house12", :fig_name) %>" title="<%= house_figures.dig("house12", :fig_name) %>: <%= house_figures.dig("house12", :translation) %>" id="figure"></li></ul>
+		</div>
+		<div id="house">
+			<ul id="house"><li id="house">Eleventh House<br><img src="/images/<%= house_figures.dig("house11", :image) %>" alt="<%= house_figures.dig("house11", :fig_name) %>" title="<%= house_figures.dig("house11", :fig_name) %>: <%= house_figures.dig("house11", :translation) %>" id="figure"></li></ul>
+		</div>
+	</div>
+
+	<div id="under">
+		<form method="POST" action="/houses/<%= "#{hex_key}" %>">
+			Notes:<br>
+			<textarea name = "notes" rows = "12" cols = "60"><%= "#{these_notes}" %></textarea>
+			<br>
+			<input type="submit">
+            
+        </form>
+	</div>
+
+</main>
+
+<aside>
+	<h1>Interpretation Aids</h1>
+	<ul>
+		<li><a href="<%= "/chart/#{hex_key}" %>">Shield Chart</a></li>
+		<li><a href="<%= "/houses/#{hex_key}" %>">Twelve Houses</a></li>
+		<li>Way of Points (not yet available)</li>
+		<li>Triplicities (not yet available)</li>
+		<ul>
+			<li>First Triplicity</li>
+			<li>Second Triplicity</li>
+			<li>Third Triplicity</li>
+			<li>Fourth Triplicity</li>
+		</ul>
+		<li>Witnesses and Judge (not yet available)</li>
+	</ul>
+</aside>
+<footer>
+	<ul><li>Geomantic is &#169; 2018 Rebecca Lynde-Scott.</li></ul>
+</footer>
+
+
+</body>
+</html>

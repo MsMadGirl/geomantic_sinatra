@@ -22,7 +22,7 @@
 <header>
 
 	<center><h1><a href="/">Geomantic</a></h1></center>
-	<center><text color="red">This chart has a unique URL! You can bookmark and share it!</text></center>
+	<center>This chart has a unique URL! You can bookmark and share it!</center>
 	<center>This chart is titled <b><%= chart_metadata.dig(0, :chart_name) %></b>. It is by <b><%= chart_metadata.dig(0, :chart_by) %></b>, for <b><%= chart_metadata.dig(0, :chart_for) %></b>, and was created on <b><%= chart_metadata.dig(0, :chart_date) %></b>, and is about <b><%= chart_metadata.dig(0, :chart_subject) %></b>.</center>
 
 	
@@ -63,10 +63,13 @@
 		</ul>
 	</div>
 	<div id="under">
-		
-		<p><%= "#{these_notes}" %></p>
-		<p><center><a href=<%= "/chart_notes_edit/#{hex_key}" %>>Add or edit notes.</a></center></p>
-		
+		<form method="POST" action="/chart/<%= "#{hex_key}" %>">
+			Notes:<br>
+			<textarea name = "notes" rows = "12" cols = "60"><%= "#{these_notes}" %></textarea>
+			<br>
+			<input type="submit">
+            
+        </form>
 	</div>
 	
 </main>

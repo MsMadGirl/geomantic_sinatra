@@ -64,7 +64,7 @@
 	</div>
 	<div id="under">
 		
-		<p><%= "#{these_notes}" %></p>
+		<p><%= chart_metadata.dig(0, :notes) %></p>
 		<p><center><a href=<%= "/chart_notes_edit/#{hex_key}" %>>Add or edit notes.</a></center></p>
 		
 	</div>
