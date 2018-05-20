@@ -84,7 +84,9 @@ def load_mother (chart_id, mother1, mother2, mother3, mother4)
 
 		c_figures = DB[:c_figures]
 
-		c_figures.insert(:chart_id => chart_id, :figure_id => figure_id, :fig_group => 'Mother', :fig_position => fig_position)
+		DB.transaction do
+			c_figures.insert(:chart_id => chart_id, :figure_id => figure_id, :fig_group => 'Mother', :fig_position => fig_position)
+		end
 	end
 
 end
@@ -130,7 +132,9 @@ def derive_daughter (this_chart_id, d_fig_position)
 
 	c_figures = DB[:c_figures]
 
-	c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Daughter', :fig_position => d_fig_position, :child_group => child_group, :child_position => child_position)
+	DB.transaction do
+		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Daughter', :fig_position => d_fig_position, :child_group => child_group, :child_position => child_position)
+	end
 
 end
 
@@ -213,7 +217,9 @@ def derive_niece (this_chart_id)
 
 		c_figures = DB[:c_figures]
 
-		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Niece', :fig_position => e, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position, :child_group => child_group, :child_position => child_position)
+		DB.transaction do
+			c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Niece', :fig_position => e, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position, :child_group => child_group, :child_position => child_position)
+		end
 	end
 	
 end
@@ -249,7 +255,9 @@ def derive_witness(this_chart_id)
 
 		c_figures = DB[:c_figures]
 
-		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Witness', :fig_position => e, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position, :child_group => 'Judge', :child_position => 1)
+		DB.transaction do
+			c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Witness', :fig_position => e, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position, :child_group => 'Judge', :child_position => 1)
+		end
 	end
 
 end
@@ -278,7 +286,9 @@ def derive_judge(this_chart_id)
 
 	c_figures = DB[:c_figures]
 
-	c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Judge', :fig_position => 1, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position)
+	DB.transaction do
+		c_figures.insert(:chart_id => this_chart_id, :figure_id => figure_id, :fig_group => 'Judge', :fig_position => 1, :parent_group => parent_group, :parent_right_position => parent_right_position, :parent_left_position => parent_left_position)
+	end
 
 	if (figure[:fire_line] + figure[:air_line] + figure[:water_line] + figure[:earth_line]).odd?
 		judge_error = "<p style=\"color:red;\">Error: Judge is odd. If you see this error, please email hexdotink@gmail.com</p>"
@@ -327,8 +337,11 @@ post '/generate' do
 
 	c_metadata = DB[:c_metadata]
 
-	chart_id = c_metadata.insert(:chart_name => chart_name, :chart_date => chart_date, :chart_for => chart_for, :chart_by => chart_by, :chart_subject => chart_subject, :hex_key => hex_key)
+	DB.transaction do
+		c_metadata.insert(:chart_name => chart_name, :chart_date => chart_date, :chart_for => chart_for, :chart_by => chart_by, :chart_subject => chart_subject, :hex_key => hex_key)
+	end
 
+	chart_id = DB.fetch('SELECT id FROM c_metadata WHERE hex_key =?', hex_key).single_value
 	session[:chart_id] = chart_id
 	session[:message] = "Stored id: #{chart_id}."
 	message = session[:message]
@@ -395,7 +408,9 @@ route :get, :post, '/chart/:hex_key' do
 	puts "*****"
 
 	if notes != nil
-		DB[:c_metadata].update(notes: notes)
+		DB.transaction do
+			DB[:c_metadata].update(notes: notes)
+		end
 	end
 
 	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key).all
@@ -468,7 +483,9 @@ route :get, :post, '/houses/:hex_key' do
 	notes = params[:notes]
 
 	if notes != nil
-		DB[:c_metadata].update(notes: notes)
+		DB.transaction do
+			DB[:c_metadata].update(notes: notes)
+		end
 	end
 
 	chart_metadata = DB.fetch('SELECT * FROM c_metadata WHERE hex_key = ?;', hex_key).all
